@@ -174,6 +174,7 @@ We will use this type of method only during logging in
 '''
 @app.route('/login_test', methods = ['GET'])
 def login_test():
+    """Login Test"""
     ip_address = request.remote_addr
     print "IP is: "+ip_address
     generatedRandomNo = urandom(25)

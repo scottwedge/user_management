@@ -1,0 +1,52 @@
+Functionality :
+***************
+Login
+Logout
+List Users (for Admin)
+Create User (for Admin
+Delete User (for Admin)
+Edit User (for Admin : change color or password for any user)
+Edit User (change color or password logged in user)
+
+Use Cases :
+***********
+Use Case 1 : Logging In by Admin
+Login with username “admin” and password “admin” by invoking Login API
+Invoke the Get_User API to authenticate Admin
+If user authenticated successfully, get list of users by invoking Get_Users API
+
+
+Use Case 2 : Logging In by User
+Login with username “user1” and password “password” by invoking Login API
+Invoke Get_User API to authenticate user
+If user authenticated successfully, user is redirected to user’s page with color as mentioned during user creation
+
+Use Case 3 : Unsuccessful Login
+Login with incorrect user name or password by invoking Login API
+Invoke Get_User API to authenticate user
+If user is NOT authenticated, send error message
+Use should be redirected back to Login page with Error message
+
+Use Case 4 : Logout
+Invoke Logout API
+User is not able to edit or list users
+
+Use Case 5 : List Users
+Check if user role is “admin”
+If yes, get list of users in the database
+
+Use Case 6 :  Create User 
+Check if user role is “admin”
+If yes, create user with following attributes : username, password, userid, role, color
+On successfully creating, redirect to user page and call list users
+
+Use Case 7 : Delete User
+Check if user role is “admin”
+If yes, check if specified user id is present in Db
+If yes, delete the user
+On successfully deleting, redirect to user page and call list users
+
+Use Case 8 : Edit User Settings
+Check if specified user id is present in Db
+If yes, edit the user’s settings
+On successfully editing, redirect to user page
