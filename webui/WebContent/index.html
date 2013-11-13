@@ -4,7 +4,7 @@
 
 	<!-- Css-->
 	<link rel="stylesheet" type="text/css" href="css/headerstyle.css">
-	
+	<link rel="stylesheet" type="text/css" href="css/menustyle.css">
 	<!-- Backbone, Underscore , Jquery dependancies -->
 	
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
@@ -26,24 +26,31 @@
 	  		Backbone.View.prototype.remove.call(this);
 		};
 		
-		var globaluser;
-		
 		var User = Backbone.Model.extend({
-			
+			methodToURL: {
+			   // 'read': '/user/get',
+			   // 'create': '/user/create',
+			   // 'update': 'http://localhost:8081/transactionjersey/rest/payment/updatePerson',
+			    //'delete': '/user/remove'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+			  },
+
+			  sync: function(method, model, options) {
+			    options = options || {};
+			    options.url = model.methodToURL[method.toLowerCase()];
+				console.log(method.toLowerCase);
+			    return Backbone.sync.apply(this, arguments);
+			  }
 		});
 		
-		var Credentials = Backbone.Model.extend({
-			url:'http://10.10.10.55:5000/login',
+		var UserCollection = Backbone.Collection.extend({
+			model:User,
+			url:'http://10.10.10.55:5000/get_users',
 			
-			defaults:{
-				'username':'admin',
-				'password':'admin'
-			},
 			parse:function(response){
-				return response;
+				console.log(response.status);
 			}
+			
 		});
-				
 		
 		var IndexView = Backbone.View.extend({
 	   
@@ -55,133 +62,47 @@
 		
 			events:{
 			},
-				
 			render: function(){
-				var credentials = new Credentials();
 				this.$el.html(this.template());
-				var loginview = new LoginView({model:credentials});
-				$("#content").html(loginview.render().el);
-	          return this;
-	          
-	    	}
-		});
-		
-		var LoginView = Backbone.View.extend({
-			
-			template : _.template($("#loginTemplate").html()),
-					
-			events:{
-				'click #loginbuttonid':'submit',
-			},
-			
-			submit:function(){
-				alert("hello");
-				var userName = $("#username").val();
-				var passWord = $("#password").val();
-				this.model.set({'password':passWord,'username':userName});
-				alert(this.model.get('username'));
-				this.save();
-			},
-			
-			save:function(){
-				this.model.save(null, {
-				    success: function (model, response) {
-				    	
-				    	
-				    	if(globaluser.get('username')=='admin'){
-				    		var route = new Router();
-			 				route.navigate('admin',{trigger:true,replace: true});
-				    	}
-				    },
-				    error: function (model, response) {
-				    	alert("invalid credentials");
-				        console.log("Error login user");
-				    }
-				});
-			},
-			
-			render:function(){
-				alert("in loginview");
-				this.$el.append(this.template());
+	        	var adminview = new AdminView();
+	        	adminview.render().el;
 				return this;
-			},
-			
+			}
 		});
 		
 		var AdminView = Backbone.View.extend({
 			
-			render:function(){
-				$("#menu").append("<ul><li>ListUser</li><li>AddUser</li><li>UpdateUser</li>");	
-				//$("#content").append("hi");
-				return this;
-			},
-		});
-		
-		
-		var PeopleView = Backbone.View.extend({
-	    	
-			events:{
-				'click #hello':'hello'
-			},
-		
-			hello : function(){
-				alert("button clicked");
-				this.close();
-				var route = new Router();
-				route.navigate('how',{trigger:true});
-			},
-			
-	    	render: function(){
-	        	this.collection.each(function(person) {
-	        		var personView = new PersonView({ model: person });
-	            	this.$el.append(personView.render().el);
-	        	}, this)
-	        	this.$el.append("<input type='button' id='hello' value='hello'></input>");
-	    	    return this;
-	    	}
-		});
-
-		var PersonView = Backbone.View.extend({
-	    	tagName: 'li',
-
-	    	template: _.template("<%=first%><%=age%><%=last%>"),
-
-	    	events:{
-	    		"click a":"clicked"
-	    	},
-	    
-	    	render: function(){
-	    		this.$el.append(this.template(this.model.toJSON()) );
-	        	return this;
-	    	},
-	    
-		});
-
-	
-		var AddUserView = Backbone.View.extend({
-			
-			template:_.template("FIRSTNAME :<input type='text' id='first'></input><br> LASTNAME : <input type='text' id='last'></input><br> AGE: <input type='text' id='age'></input><br> <input type='button' id='adde' value='ADD'>"),
+			el:"#mainContent", 
+				
+			template:_.template($("#menuscript").html()),
 			
 			events:{
-				'click #adde':'add',
+				'click #listuser':'listuser'
 			},
+		
+			initialize:function(){
+				_.bindAll(this); 
+				var users = new UserCollection();
+				users.fetch({
+					error: function () {
+	    	 	         
+	    	 	    		},
+	    	 	       success: function () {
+	    	 	           
+	    	 	    	}
+	    	 	    }).complete(function () {
+	    	 	    	console.log(users.models);
+	    	 	    });
+		    },
 			
-			add:function(){
-				this.model.set({first:$('#first').val()});
-				this.model.set({last:$('#last').val()});
-				this.model.set({age:$('#age').val()});
-				console.log(this.model.toJSON());
-				this.model.save();
-			},
+			
 			render:function(){
-				this.$el.html(this.template);
+				$("#menu").html(this.template);	
 				return this;
 			}
 			
 		});
-		
-		
-		
+				
 		var Router = Backbone.Router.extend({
 	    	vied : null,
 			routes: {
@@ -190,8 +111,8 @@
 	        },
 	      
 	    	index: function(){
+	    		alert("in index");
 	    		var indexview = new IndexView();
-	    		console.log(indexview);
 	    		$(document.body).append(indexview.render().el);
 	    	},
 	    	
@@ -245,24 +166,20 @@
 		
 	</div>
 
+	<script type="text/template" id="menuscript">
+			<div id='cssmenu'>
+				<ul>
+				<li id='listuser'><a><span>ListUser</span></a>
+				</li>
+				<li class='has-sub'><a><span>Update User</span></a>
+					<ul><li class='last'><a><span>Update Role</span></a></li>
+						<li class='last'><a><span>Update UserName</span></a></li>
+					</ul>
+				</li>
+				<li class='last'><a ><span>Delete User</span></a></li></ul></div>
+	</script>
 	
-	<!-- Template for login -->
-		<script type="text/template" id="loginTemplate">
-				<div id='login'>
-				<form>
-					<fieldset>
-  						<legend>Please Login</legend>
-    						<label for="name">Username:</label>
-    						<input type="text" name="name" id="username" />
-    						<br />
-    						<label for="password">Password:</label>
-    						<input type="password" name="pass" id="password" />
-    						<br />
-    						<input type="button" class='buttonclass' value="Login" id="loginbuttonid" />
-  					</fieldset>
-				</form>
-				</div>
-		</script>
+	
 	
 	</body>
 	
