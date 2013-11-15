@@ -1,0 +1,27 @@
+The Requirements for the User Management Module is as follows :
+***************************************************************
+1. User should be able to Login from the Login Page
+2. A User can either be a regular "User" or "Admin" user
+3. If logged-in as a regular user, the user should be able to do the following :
+    - Edit his information like Address, Email, etc.
+    - Change his password
+    - Edit his preferences
+4. If logged-in as Admin user, the user should be able to do the following :
+    - See a list of all users in the system
+    - Create a new user
+    - Delete an existing user
+    - Edit the details (both personal Info as well as Preferencs) of an existing user
+    - Edit his information like Address, Email, etc.
+    - Change his password
+    - Edit his preferences
+5. Once a regular user is logged in, he should not be able to see the details of other users from the same browser
+6. Any user should be able to Log out
+7. Once a User is Logged out, he should not be able to visit any other page
+
+
+Additional Requirements :
+*************************
+1. If Admin user is looking at the list of existing users and a new user is created from another browser/tab/page, the list should be updated to show the new user without requiring a manual refresh of the entire page 
+2. If Admin user is looking at the list of existing users and a new user is deleted from another browser/tab/page, the list should be updated to not show the deleted user without requiring a manual refresh of the entire page 
+1. If Admin user is looking at the list of existing users and details of existing  user is updated from another browser/tab/page, the list should be updated to show the updated user information without requiring a manual refresh of the entire page 
+
