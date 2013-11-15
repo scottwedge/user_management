@@ -13,6 +13,7 @@ app = Flask(__name__)
 
 
 
+
 @app.route('/login', methods = ['POST'])
 def login():
     """Login method"""
@@ -28,23 +29,31 @@ def login():
     #getting user credentials object by username and password
     user_cred = get_user_byusername(username,password)
     
-    #adding 'id' in temporary dictionary
-    temp_dict["id"] = user_cred.id
+    if user_cred == False:
+        
+        temp_dict['status'] = 'INVALID'
+        
+    else:
+        
+        temp_dict['status'] = 'SUCCESS'
+        
+        #adding 'id' in temporary dictionary
+        temp_dict["id"] = user_cred.id
     
-    #adding 'username' in temporary dictionary
-    temp_dict["username"] = user_cred.username
+        #adding 'username' in temporary dictionary
+        temp_dict["username"] = user_cred.username
     
-    #getting user preference object by id
-    user_pref = get_user_pref(user_cred.id)
+        #getting user preference object by id
+        user_pref = get_user_pref(user_cred.id)
     
-    #adding 'color' in temporary dictionary
-    temp_dict["color"] = user_pref.color
+        #adding 'color' in temporary dictionary
+        temp_dict["color"] = user_pref.color
     
-    #getting user role object by id
-    user_role = get_user_role(user_cred.id)
+        #getting user role object by id
+        user_role = get_user_role(user_cred.id)
     
-    #adding 'color' in temporary dictionary
-    temp_dict["role"] = user_role.role
+        #adding 'color' in temporary dictionary
+        temp_dict["role"] = user_role.role
     
     return jsonify( { 'user': temp_dict } )
 
@@ -130,23 +139,116 @@ def get_user_pref_api(user_id):
         
         return jsonify( {'user_pref': temp_dict} )
 
-@app.route('/update_user_info/<user_id>', methods = ['PUT'])
-def update_user_info_api(user_id):
+@app.route('/update_user_info', methods = ['PUT'])
+def update_user_info_api():
     """Method for updating user_info object """
+    if not request.json:
+        abort(400)
     
-    edit_user_info()
-    return ""
+    status = edit_user_info_method()
+    
+    if status == True:
+        return "updated"
+    else:
+        return "",406
+    
+
+@app.route('/update_user_pref', methods = ['PUT'])
+def update_user_pref_api():
+    """Method for updating user_pref object """
+    if not request.json:
+        abort(400)
+
+    status = edit_user_pref_method()
+    
+    if status == True:
+        return "updated"
+    else:
+        return "",406
+    
+
+@app.route('/add_user_creds', methods = ['POST'])
+def add_user_creds_api():
+    """Method for adding user credentials"""
+    if not request.json:
+        abort(400)
+    
+    username = request.json['username']
+    password = request.json['password']
+    
+    created_user = add_user(username,password)
+    
+    if created_user == False:
+        return "user not created",406
+    else:
+        return jsonify( {'user_id':created_user.id} )
+        
+        
+        
+
+
+    
+@app.route('/add_user_pref', methods = ['POST'])
+def add_user_pref_api():
+    """Method for adding user pref"""
+    if not request.json:
+        abort(400)
+    
+    status = edit_user_pref_method()
+    
+    if status == True:
+        return "added"
+    else:
+        return "",406
+    
+
+@app.route('/add_user_info', methods = ['POST'])
+def add_user_info_api():
+    """Method for adding user info"""
+    if not request.json:
+        abort(400)
+    
+    status = edit_user_info_method()
+    
+    if status == True:
+        return "added"
+    else:
+        return "",406
+
+
+@app.route('/add_user_role', methods = ['POST'])
+def add_user_role_api():
+    """Method for adding user role"""
+    if not request.json:
+        abort(400)
+    
+    user_id = request.json['id']
+    user_role = request.json['role']
+    
+    status = edit_user_role(user_id,user_role)
+    
+    if status == True:
+        return "added"
+    else:
+        return "",406
+
 
 
 @app.route('/temp_login', methods = ['POST'])
 def temp_login():
-    session['dummy']="ghghgh"
     temp_dict={}
-    temp_dict["id"] = 7
-    temp_dict["username"] = "manish"
-    temp_dict["color"] = "Red"
-    temp_dict["role"] = "User"
-    temp_dict["authentication_id"] = 47575844
+    
+    username = request.json['username']
+    password = request.json['password']
+    
+    if username=="manish" and password=="manish":
+        temp_dict["id"] = 28
+        temp_dict["username"] = "manish"
+        temp_dict["color"] = "Green"
+        temp_dict["role"] = "User"
+        temp_dict["status"] = "SUCCESS"
+    else:
+        temp_dict["status"] = "INVALID"
     
     return jsonify( { 'user':temp_dict} )
 
@@ -186,12 +288,48 @@ def clear():
     print ll'''
     return "done"
 
+
+
+"""General methods"""
+
+def edit_user_pref_method():
+    """This is generalized method for editing user_pref
+    Made it generalized beacuse it is being called from multiple places"""
+    temp_user_pref = user_pref()
+    
+    temp_user_pref.id = request.json['id']
+    temp_user_pref.color = request.json['color']
+    temp_user_pref.decimal = request.json['decimal']
+    temp_user_pref.currency = request.json['currency']
+    temp_user_pref.time_format = request.json['time_format']
+    temp_user_pref.date_format = request.json['date_format']
+    
+    status = edit_user_pref(temp_user_pref.id,temp_user_pref)
+    
+    return status
     
 
-
-@app.route('/aa', methods = ['GET'])
-def aa():
-    return "workingg"
+def edit_user_info_method():
+    """This is generalized method for editing user_info
+    Made it generalized beacuse it is being called from multiple places"""
+    
+    temp_user_info = user_info()
+    
+    temp_user_info.id = request.json['id']
+    temp_user_info.firstname = request.json['firstname']
+    temp_user_info.lastname = request.json['lastname']
+    temp_user_info.phone1 = request.json['phone1']
+    temp_user_info.phone2 = request.json['phone2']
+    temp_user_info.primary_email = request.json['primary_email']
+    temp_user_info.email = request.json['email']
+    temp_user_info.address_line1 = request.json['address_line1']
+    temp_user_info.address_line2 = request.json['address_line2']
+    temp_user_info.pin = request.json['pin']
+    temp_user_info.country = request.json['country']
+    
+    status = edit_user_info(temp_user_info.id,temp_user_info)
+    
+    return status
 
 
 
