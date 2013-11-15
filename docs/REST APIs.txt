@@ -1,0 +1,281 @@
+Available RESTful APIs:
+
+------POST METHODS-------
+
+1. API for Login:
+
+URL   	: /login
+METHOD	: POST
+INPUT 	: Json with required fields.
+			Ex:
+				{
+				"username":"manish",
+				"password":"manish"
+				}
+RESPONSE: It returns Json with required response code
+		  If user exists then,
+			Response Code = 200 and Json will be like,
+				{
+				"user": {
+						"color": "Green", 
+						"id": 28, 
+						"role": "User", 
+						"status": "SUCCESS", 
+						"username": "manish"
+						}
+				}
+		 Otherwise
+				Response Code = 200 and Json will be like,
+				{
+				"user": {
+					"status": "INVALID"
+					}
+				}
+				
+				
+2. API for adding User Credentials:
+
+URL   	: /add_user_creds
+METHOD	: POST
+INPUT 	: Json with required fields.
+			Ex:
+				{
+				"username":"manish",
+				"password":"manish"
+				}
+RESPONSE: If added it will return generated id of user:
+			Response code = 200
+				{
+					user_id: 34
+				}
+				
+		   If failed then:
+			Response code = 406
+			Response = "user not created"
+
+
+3. API for adding User Preferences:
+
+URL   	: /add_user_pref
+METHOD	: POST
+INPUT 	: Json with required fields.
+			Ex:
+			{
+				"id":30,
+				"color":"Blue",
+				"decimal":"45",
+				"currency":"in",
+				"time_format":"mm/dd/yy",
+				"date_format":"HH:MM:SS"
+			}
+RESPONSE: If added:
+			Response code = 200
+			Response = "added"
+		  If failed then:
+			Response code = 406
+			
+4. API for adding new Role:
+
+URL   	: /add_user_role
+METHOD	: POST
+INPUT 	: Json with required fields.
+			Ex:
+			{
+				"id":31,
+				"role":"User"
+			}
+RESPONSE: If added:
+			Response code = 200
+			Response = "added"
+		  If failed then:
+			Response code = 406
+
+
+5. API for adding User Info:
+
+URL   	: /add_user_info
+METHOD	: POST
+INPUT 	: Json with required fields.
+		Ex:
+			{
+			"user_info": {
+					"address_line1": "Pune", 
+					"address_line2": null, 
+					"country": "", 
+					"email": null, 
+					"firstname": "Manish", 
+					"lastname": "Meshram", 
+					"phone1": "8446769080", 
+					"phone2": null, 
+					"pin": 411052, 
+					"primary_email": "manish@zymrinc.com"
+				}
+			}
+
+RESPONSE: If added:
+			Response code = 200
+			Response = "added"
+		  If failed then:
+			Response code = 406
+			
+------GET METHODS-------
+
+6. API for getting all users:
+
+URL   	: /get_users
+METHOD	: GET
+RESPONSE: If there are non-zero users in db:
+			Response code = 200
+			Response = (Array of users in JSON)
+			Ex:
+			{
+				"users": [
+					{
+						"firstname": "Manish", 
+						"id": 28, 
+						"lastname": "Meshram", 
+						"role": "User"
+					}, 
+					{
+						"firstname": "Raseel", 
+						"id": 29, 
+						"lastname": "Bhagat", 
+						"role": "Admin"
+					}]
+			}
+		  If there are no users then:
+			Response code = 406
+			Response = "There are no users"
+			
+7. API for getting a single user info:
+
+URL   	: /get_user_info/<user_id>
+METHOD	: GET
+RESPONSE: If user is present:
+			Response code = 200
+			Response = (user_info JSON)
+			Ex:
+			{
+			"user_info": {
+					"address_line1": "Pune", 
+					"address_line2": null, 
+					"country": "", 
+					"email": null, 
+					"firstname": "Manish", 
+					"lastname": "Meshram", 
+					"phone1": "8446769080", 
+					"phone2": null, 
+					"pin": 411052, 
+					"primary_email": "manish@zymrinc.com"
+				}
+			}
+		  If failed:
+				Response code = 406
+				Response = "INVALID ID"
+					
+					
+8. API for getting single user pref:
+
+URL   	: /get_user_pref/<user_id>
+METHOD	: GET
+RESPONSE: If user is present:
+			Response code = 200
+			Response = (user_pref JSON)
+			Ex:
+			{
+				"user_pref": {
+						"color": "Green", 
+						"currency": null, 
+						"date_format": null, 
+						"decimal": null, 
+						"time_format": null
+					}
+			}
+			If failed:
+					Response code = 406
+					Response = "INVALID ID"
+
+					
+------PUT METHODS-------
+
+9. API for updating user info:
+
+URL   	: /update_user_info/<user_id>
+METHOD	: PUT
+INPUT	: Json with required fields.
+		Ex:
+		{
+			"id":30,
+			"firstname":"pankaj",
+			"lastname":"jagarwal",
+			"phone1":"57683977",
+			"phone2":"12121212",
+			"primary_email":"pankaj@zymrinc.com",
+			"email":"ghggg@zymr.com",
+			"address_line1":"Bavdhan",
+			"address_line2":"Pune",
+			"pin":411321,
+			"country":"us"
+		}
+RESPONSE:
+		If succeeded:
+			Response code = 200
+			Response = "updated"
+		If failed:
+			Response code = 406
+			Response = "INVALID ID"
+					
+10. API for updating user pref:
+
+URL   	: /update_user_pref/<user_id>
+METHOD	: PUT
+INPUT	: Json with required fields.
+		Ex:
+		{
+			"id":30,
+			"color":"Blue",
+			"decimal":"45",
+			"currency":"in",
+			"time_format":"mm/dd/yy",
+			"date_format":"HH:MM:SS"
+		}
+
+RESPONSE:
+		If succeeded:
+			Response code = 200
+			Response = "updated"	
+		If failed:
+			Response code = 406
+			Response = "INVALID ID"
+			
+			
+11. API for change password:
+
+URL   	: /change_password
+METHOD	: PUT
+INPUT	: Json with required fields.
+		Ex:
+		{
+			"id":27,
+			"old_password":"manish",
+			"new_password":"manish",
+		}
+RESPONSE: If succeeded:
+			Response code = 200
+			Response = "changed"
+		  If failed:
+			"INVALID USER"/"INCORRECT PASSWORD"/"ERROR" accordingly.
+			
+------DELETE METHOD-------
+
+12. API for deleting user:
+
+URL   	: /delete_user/<user_id>
+METHOD	: DELETE
+RESPONSE:
+		If succeeded:
+			Response code = 200
+			Response = "user deleted"	
+		If failed:
+			Response code = 406
+			Response = "INVALID ID"
