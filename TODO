@@ -1,0 +1,5 @@
+The following are the list of things to be done in Services and API code :
+- Session Management
+- Unit Testing
+- Check usage of  "import pdao as db" so that there is no namespace conflict
+- 
