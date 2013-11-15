@@ -1,0 +1,31 @@
+<mockup version="1.0" skin="sketch" fontFace="Balsamiq Sans" measuredW="1106" measuredH="532" mockupW="736" mockupH="456">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="370" y="76" w="736" h="456" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>A%20Web%20Page%0Ahttp%3A//localhost%3A8080/UserManagementConsole/index.html</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::Canvas" x="370" y="148" w="736" h="50" measuredW="100" measuredH="70" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>3624540</color>
+      </controlProperties>
+    </control>
+    <control controlID="2" controlTypeID="com.balsamiq.mockups::Title" x="646" y="152" w="148" h="-1" measuredW="115" measuredH="43" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <color>16777215</color>
+        <text>ZYMR</text>
+      </controlProperties>
+    </control>
+    <control controlID="3" controlTypeID="com.balsamiq.mockups::List" x="393" y="285" w="89" h="103" measuredW="100" measuredH="126" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>ListUser%0AAddUser%0AUpdateUser%20%3E%0ADeleteUser</text>
+      </controlProperties>
+    </control>
+    <control controlID="4" controlTypeID="com.balsamiq.mockups::Canvas" x="552" y="209" w="397" h="276" measuredW="100" measuredH="70" zOrder="4" locked="false" isInGroup="-1"/>
+    <control controlID="5" controlTypeID="com.balsamiq.mockups::DataGrid" x="575" y="264" w="350" h="81" measuredW="369" measuredH="81" zOrder="5" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Id%2C%20FIRSTNAME%20%2C%20LASTNAME%2CROLE%2CACION%0A1%2CManish%2CMeshram%2CUSER%2CUPDATE/DELETE%0A2%2CRaseel%2CBhagat%2CADMIN%2CUPDATE/DELETE</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>

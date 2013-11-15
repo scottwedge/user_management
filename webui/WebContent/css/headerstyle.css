@@ -11,6 +11,7 @@ body{
 		background-color:#374e5c;
 		margin-bottom: 10px;
 		border: thick;
+		color:white;
 }
 
 #mainContent{
@@ -28,6 +29,7 @@ body{
 }
 
 #menu{
+	position:fixed;
 	margin-top:150px; 
 	padding:0;
 	float:left;
@@ -43,7 +45,7 @@ body{
 	background-color:green;
 	
 }
-#login{
+#login,#user{
 	margin-top:100px;
 	margin-left:auto;
 	margin-right:auto;
@@ -132,3 +134,7 @@ label {
 	position:relative;
 	top:1px;
 }
+#welcome{
+	
+}
+
