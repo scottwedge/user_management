@@ -125,7 +125,7 @@ def add_user(username1,password1):
     except:
         return False
     else:
-        return True
+        return user1
     
 
 #add the given user to the user_credential table and create entry in all other table with same id 
@@ -183,7 +183,7 @@ def edit_user_info(id,user):
         return False
     else:
         
-        if user1.username and user1.lastname and user1.phone1 and user1.phone2 and user1.primary_email and user1.email and user1.address_line1 and user1.address_line2 and user1.pin and user1.country and user1.image==None:
+        if user1.firstname and user1.lastname and user1.phone1 and user1.phone2 and user1.primary_email and user1.email and user1.address_line1 and user1.address_line2 and user1.pin and user1.country and user1.image==None:
             user1.firstname=user.firstname
             user1.lastname=user.lastname
             user1.phone1=user.phone1
@@ -238,7 +238,7 @@ def edit_user_info(id,user):
     
 def edit_user_pref(id,user):
     try:
-        user1 = user_pref.get(user.userid1==id)
+        user1 = user_pref.get(user_pref.id==id)
  
     except DoesNotExist:
         return False
@@ -278,7 +278,7 @@ def edit_user_pref(id,user):
 
 def edit_user_role(id,role):
     try:
-        user1=user_info.get(user_role.id==id)
+        user1=user_role.get(user_role.id==id)
     except DoesNotExist:
         return False
     else:
@@ -297,7 +297,10 @@ def edit_user_role(id,role):
 
 def get_user_byusername(username,password):
     try:
-        user=user_credential.get(user_credential.username==username and user_credential.password==password)  
+        user=user_credential.get(user_credential.username==username)
+        
+        if user.password!=password:
+            return False 
     
     except DoesNotExist:
         return False
@@ -312,9 +315,9 @@ def list_all_users():
     user_list=[]
     try:
         for user in user_credential.select():
-            user_list.append(user)   
-    except:
+            user_list.append(user)
         
+    except:
         return False
     else:
         return user_list
