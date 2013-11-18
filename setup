@@ -1,0 +1,5 @@
+#source this file
+export BASEDIR=`pwd`
+echo BASEDIR=$BASEDIR
+export PYTHONPATH=$BASEDIR:$BASEDIR/api:$BASEDIR/DB
+echo PYTHONPATH=$PYTHONPATH
