@@ -187,7 +187,7 @@ def add_user_creds_api():
         return jsonify({'user_id': created_user.id})
 
 
-@app.route('/add_user_pref', methods=['POST'])
+@app.route('/add_user_pref', methods=['PUT'])
 def add_user_pref_api():
     """Method for adding user pref"""
     if not request.json:
@@ -201,21 +201,22 @@ def add_user_pref_api():
         return "", 406
 
 
-@app.route('/add_user_info', methods=['POST'])
+@app.route('/add_user_info', methods=['PUT'])
 def add_user_info_api():
     """Method for adding user info"""
+    #print request
     if not request.json:
         abort(400)
 
     status = edit_user_info_method()
 
     if status == True:
-        return "added"
+        return jsonify({"status": "SUCCESS"})
     else:
         return "", 406
 
 
-@app.route('/add_user_role', methods=['POST'])
+@app.route('/add_user_role', methods=['PUT'])
 def add_user_role_api():
     """Method for adding user role"""
     if not request.json:
@@ -227,7 +228,7 @@ def add_user_role_api():
     status = edit_user_role(user_id, user_role)
 
     if status == True:
-        return "added"
+        return jsonify({"status": "SUCCESS"})
     else:
         return "", 406
 
