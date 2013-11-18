@@ -254,11 +254,10 @@ def add_user_role_api():
 @app.route('/logout', methods=['POST'])
 @login_required
 def logout():
-    """Logout method is incomplete.Will complete it when
-    we will be able to manage the session"""
+    """Logout method"""
 
     logout_user()
-    return ""
+    return jsonify({"status": "SUCCESS"})
 
 
 @app.route('/change_password', methods=['PUT'])
