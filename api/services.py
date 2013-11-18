@@ -3,13 +3,19 @@ Created on Nov 14, 2013
 
 @author: manish.meshram
 '''
-from flask import Flask, jsonify, session, make_response
+from flask import Flask, jsonify
 from flask import request, abort
 from pdao import *
-from os import urandom
+from flask_login import LoginManager, login_required, login_user, logout_user
 
 
 app = Flask(__name__)
+login_manager = LoginManager()
+
+
+@login_manager.user_loader
+def load_user(userid):
+    return get_user_credential(userid)
 
 
 @app.route('/login', methods=['POST'])
@@ -54,12 +60,15 @@ def login():
         #adding 'username' in temporary dictionary
         temp_dict["username"] = user_cred.username
 
+        login_user(user_cred)
+
         temp_dict['status'] = 'SUCCESS'
 
     return jsonify({'user': temp_dict})
 
 
 @app.route('/get_users', methods=['GET'])
+@login_required
 def get_users():
     """Method for getting all the users present"""
     user_creds_list = list_all_users()
@@ -87,6 +96,7 @@ def get_users():
 
 
 @app.route('/delete_user/<user_id>', methods=['DELETE'])
+@login_required
 def delet_user(user_id):
     """Method for delete user.Given the name as delet because our DAO layer
     method name is delete_user"""
@@ -98,6 +108,7 @@ def delet_user(user_id):
 
 
 @app.route('/get_user_info/<user_id>', methods=['GET'])
+@login_required
 def get_user_info_api(user_id):
     """Method for getting user_info object of given user_id"""
     user_info = get_user_info(user_id)
@@ -124,6 +135,7 @@ def get_user_info_api(user_id):
 
 
 @app.route('/get_user_pref/<user_id>', methods=['GET'])
+@login_required
 def get_user_pref_api(user_id):
     """Method for getting user_pref object """
     user_pref = get_user_pref(user_id)
@@ -143,6 +155,7 @@ def get_user_pref_api(user_id):
 
 
 @app.route('/update_user_info', methods=['PUT'])
+@login_required
 def update_user_info_api():
     """Method for updating user_info object """
     if not request.json:
@@ -157,6 +170,7 @@ def update_user_info_api():
 
 
 @app.route('/update_user_pref', methods=['PUT'])
+@login_required
 def update_user_pref_api():
     """Method for updating user_pref object """
     if not request.json:
@@ -171,6 +185,7 @@ def update_user_pref_api():
 
 
 @app.route('/add_user_creds', methods=['POST'])
+@login_required
 def add_user_creds_api():
     """Method for adding user credentials"""
     if not request.json:
@@ -188,6 +203,7 @@ def add_user_creds_api():
 
 
 @app.route('/add_user_pref', methods=['PUT'])
+@login_required
 def add_user_pref_api():
     """Method for adding user pref"""
     if not request.json:
@@ -196,12 +212,13 @@ def add_user_pref_api():
     status = edit_user_pref_method()
 
     if status == True:
-        return "added"
+        return jsonify({"status": "SUCCESS"})
     else:
         return "", 406
 
 
 @app.route('/add_user_info', methods=['PUT'])
+@login_required
 def add_user_info_api():
     """Method for adding user info"""
     #print request
@@ -217,6 +234,7 @@ def add_user_info_api():
 
 
 @app.route('/add_user_role', methods=['PUT'])
+@login_required
 def add_user_role_api():
     """Method for adding user role"""
     if not request.json:
@@ -234,14 +252,17 @@ def add_user_role_api():
 
 
 @app.route('/logout', methods=['POST'])
+@login_required
 def logout():
     """Logout method is incomplete.Will complete it when
     we will be able to manage the session"""
 
-    return "incomplete"
+    logout_user()
+    return ""
 
 
 @app.route('/change_password', methods=['PUT'])
+@login_required
 def change_password():
     """Change password method"""
     if not request.json:
@@ -318,4 +339,5 @@ def edit_user_info_method():
 
 if __name__ == '__main__':
     app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+    login_manager.init_app(app)
     app.run(debug=True, host="0.0.0.0")
