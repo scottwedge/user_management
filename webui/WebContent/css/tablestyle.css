@@ -1,7 +1,9 @@
 table {
     *border-collapse: collapse; /* IE7 and lower */
     border-spacing: 0;
-    width: 50%;    
+    width: 50%; 
+    margin-left:auto;
+	margin-right:auto;   
     
 }
 

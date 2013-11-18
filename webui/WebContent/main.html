@@ -14,8 +14,7 @@ $(function(){
 		$('#submitButton').click( function(e) {
 			
 			e.preventDefault();
-			
-			
+						
 			var username= $("#username").val();
 			var password=$("#password").val();
 			
@@ -26,7 +25,7 @@ $(function(){
 			var loginjson = $.toJSON(Credentials);
 						 
 			$.ajax({
-			   url: 'http://10.10.10.55:5000/temp_login', 
+			   url: 'http://10.10.10.55:5000/login', 
 			   data: loginjson,  // serialized data to send on server
 			   dataType:'json', // set recieving type - JSON in case of a question
 			   type:'POST', // set sending HTTP Request type
@@ -72,6 +71,7 @@ $(function(){
   						<legend>Please Login</legend>
     						<label for="name">Username:</label>
     						<input type="text" name="name" id="username" required />
+    						<label for="username" class="error" generated="true"></label>
     						<br />
     						<label for="password">Password:</label>
     						<input type="password" name="pass" id="password" required />

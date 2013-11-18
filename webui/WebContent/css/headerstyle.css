@@ -12,7 +12,12 @@ body{
 		margin-bottom: 10px;
 		border: thick;
 		color:white;
+		text-align: center;
+		font-size: 250%;
+		
 }
+
+
 
 #mainContent{
 	margin-top:100px;
@@ -53,6 +58,14 @@ body{
 	height: 400px;
 }
 
+#adduserinfo{
+	margin-top:100px;
+	margin-left:auto;
+	margin-right:auto;
+	width: 500px;
+	
+}
+
 fieldset {
 	border-radius: 5px 10px 5px 10px / 10px 5px 10px 5px;
 	border:1px solid #888;
@@ -75,7 +88,7 @@ legend {
 	text-transform:uppercase;
 }
 
-input[type='text'], input[type='password'] {
+input[type='text'], input[type='password'], select{
 	padding-top:5px;
 	display:block;
 	width:175px;
