@@ -304,7 +304,7 @@ def edit_user_role(id, role):
 #in edit_user_role,id and user object is taken as input and the attributes which are updated of the user with given id is changed
 
 
-def get_user_byusername(username, password):
+def get_user(username, password):
     try:
         user = user_credential.get(user_credential.username == username)
 
@@ -316,7 +316,21 @@ def get_user_byusername(username, password):
 
     else:
         return user
+
 #get_user_byusername function takes username and password as input and returns the object of user_credential with same username and password
+
+
+def get_user_by_username(username):
+    try:
+        user = user_credential.get(user_credential.username == username)
+
+    except DoesNotExist:
+        return False
+
+    else:
+        return user
+
+
 
 
 def list_all_users():

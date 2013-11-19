@@ -34,7 +34,7 @@ def login():
     temp_dict['status'] = 'INVALID'
 
     #getting user credentials object by username and password
-    user_cred = get_user_byusername(username, password)
+    user_cred = get_user(username, password)
 
     if user_cred != False:
 
@@ -105,6 +105,78 @@ def delet_user(user_id):
     if status == True:
         return "user deleted"
     return "INVALID ID", 406
+
+
+@app.route('/get_user/<username>/<current_user_id>', methods=['GET'])
+@login_required
+def get_user_api(username, current_user_id):
+    """Method for getting full information of User
+    by using its username which is unique
+    Responses:
+    INVALID USERNAME - your given username is not present
+    USER INFO NOT PRESENT - user_info is not available
+                            for required username
+    USER PREF NOT PRESENT - user_pref is not available
+                            for required username
+    INVALID USER ID - entered current_user_id is wrong
+    USER ROLE NOT PRESENT - user_role is not available
+                            for required username"""
+
+    #temporary directory we will send as response
+    temp_dict = {}
+
+    user_cred = get_user_by_username(username)
+
+    if user_cred == False:
+        return jsonify({'status': 'INVALID USERNAME'}), 406
+    else:
+        temp_dict['id'] = user_cred.id
+
+        #getting user_info
+        user_info = get_user_info(user_cred.id)
+
+        if user_info == False:
+            return jsonify({'status': 'USER INFO NOT PRESENT'}), 406
+        else:
+            temp_dict['firstname'] = user_info.firstname
+            temp_dict['lastname'] = user_info.lastname
+            temp_dict['phone1'] = user_info.phone1
+            temp_dict['phone2'] = user_info.phone2
+            temp_dict['primary_email'] = user_info.primary_email
+            temp_dict['email'] = user_info.email
+            temp_dict['address_line1'] = user_info.address_line1
+            temp_dict['address_line2'] = user_info.address_line2
+            temp_dict['pin'] = user_info.pin
+            temp_dict['country'] = user_info.country
+
+        #getting user_pref
+        user_pref = get_user_pref(user_cred.id)
+
+        if user_pref == False:
+            return jsonify({'status': 'USER PREF NOT PRESENT'}), 406
+        else:
+            temp_dict['color'] = user_pref.color
+            temp_dict['decimal'] = user_pref.decimal
+            temp_dict['currency'] = user_pref.currency
+            temp_dict['time_format'] = user_pref.time_format
+            temp_dict['date_format'] = user_pref.date_format
+
+        #if 'admin' is logged in then only he will see the role field
+
+        logged_in_user_role = get_user_role(current_user_id)
+
+        if logged_in_user_role == False:
+            return jsonify({'status': 'INVALID USER ID'}), 406
+        elif logged_in_user_role.role == 'Admin':
+
+            user_role = get_user_role(user_cred.id)
+
+            if user_role == False:
+                return jsonify({'status': 'USER ROLE NOT PRESENT'}), 406
+            elif user_role.role != 'Admin':
+                temp_dict['role'] = user_role.role
+
+    return jsonify({'user': temp_dict})
 
 
 @app.route('/get_user_info/<user_id>', methods=['GET'])
