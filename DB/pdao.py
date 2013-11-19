@@ -8,7 +8,7 @@ from peewee import *
 db = MySQLDatabase("user_management", user="root", passwd="root", host="127.0.0.1", port=3306)
 
 
-class UserCredential(Model):
+class user_credential(Model):
     id = PrimaryKeyField()
     username = CharField()
     password = CharField()
@@ -28,11 +28,11 @@ class UserCredential(Model):
     class Meta:
         database = db
 
-#UserCredential table structure where id act as primary_key,database here is user_management
+#user_credential table structure where id act as primary_key,database here is user_management
 
 
-class UserInfo(Model):
-    id1 = ForeignKeyField(UserCredential)
+class user_info(Model):
+    id1 = ForeignKeyField(user_credential)
     firstname = CharField()
     lastname = CharField()
     phone1 = CharField()
@@ -48,11 +48,11 @@ class UserInfo(Model):
     class Meta:
         database = db
 
-#UserInfo table structure where id1 is foreign_key
+#user_info table structure where id1 is foreign_key
 
 
-class UserPref(Model):
-    id2 = ForeignKeyField(UserCredential)
+class user_pref(Model):
+    id2 = ForeignKeyField(user_credential)
     color = CharField()
     decimal = CharField()
     currency = CharField()
@@ -62,22 +62,22 @@ class UserPref(Model):
     class Meta:
         database = db
 
-#UserPref table structure where id2 is foreign_key
+#user_pref table structure where id2 is foreign_key
 
 
-class UserRole(Model):
-    id3 = ForeignKeyField(UserCredential)
+class user_role(Model):
+    id3 = ForeignKeyField(user_credential)
     role = CharField()
 
     class Meta:
         database = db
 
-#UserRole table structure where id3 is foreign key
+#user_role table structure where id3 is foreign key
 
 
 def get_user_credential(id):
     try:
-        user = UserCredential.get(UserCredential.id == id)
+        user = user_credential.get(user_credential.id == id)
 
     except DoesNotExist:
         return False
@@ -90,7 +90,7 @@ def get_user_credential(id):
 
 def get_user_info(id):
     try:
-        user = UserInfo.get(UserInfo.id == id)
+        user = user_info.get(user_info.id == id)
 
     except DoesNotExist:
         return False
@@ -103,7 +103,7 @@ def get_user_info(id):
 
 def get_user_pref(id):
     try:
-        user = UserPref.get(UserPref.id == id)
+        user = user_pref.get(user_pref.id == id)
 
     except DoesNotExist:
         return False
@@ -116,7 +116,7 @@ def get_user_pref(id):
 
 def get_user_role(id):
     try:
-        user = UserRole.get(UserRole.id == id)
+        user = user_role.get(user_role.id == id)
 
     except DoesNotExist:
         return False
@@ -129,27 +129,27 @@ def get_user_role(id):
 
 def add_user(username1, password1):
     try:
-        user1 = UserCredential.create(username = username1, password = password1)
-        user2 = UserInfo.create(id = user1.id)
-        user3 = UserPref.create(id = user1.id)
-        user4 = UserRole.create(id = user1.id)
+        user1 = user_credential.create(username = username1, password = password1)
+        user2 = user_info.create(id = user1.id)
+        user3 = user_pref.create(id = user1.id)
+        user4 = user_role.create(id = user1.id)
 
     except:
-        return 'Username already present'
+        return False
 
     else:
         return True
 
 
-#add the given user to the UserCredential table and create entry in all other table with same id
+#add the given user to the user_credential table and create entry in all other table with same id
 
 
 def delete_user(id):
     try:
-        user = UserCredential.get(UserCredential.id == id)
-        user1 = UserInfo.get(UserInfo.id == id)
-        user2 = UserPref.get(UserPref.id == id)
-        user3 = UserRole.get(UserRole.id == id)
+        user = user_credential.get(user_credential.id == id)
+        user1 = user_info.get(user_info.id == id)
+        user2 = user_pref.get(user_pref.id == id)
+        user3 = user_role.get(user_role.id == id)
 
     except DoesNotExist:
         return False
@@ -166,77 +166,79 @@ def delete_user(id):
 
 def edit_user_credential(id, user):
     try:
-        user1 = UserCredential.get(UserCredential.id == id)
+        user1 = user_credential.get(user_credential.id == id)
 
     except DoesNotExist:
         return False
 
     else:
-        if user.username and user.password != '':
+        if user.username != None and user.username != user1.username:
             user1.username = user.username
+
+        if user.password != None and user.password != user1.password:
             user1.password = user.password
-        else:
-            return 'Username or Password cannot be null'
 
         user1.save()
         return True
+
 
 #In edit_user_credential function,id and user object is taken as input and the username and password of the user with given id is changed
 
 
 def edit_user_info(id, user):
     try:
-        user1 = UserInfo.get(UserInfo.id == id)
+        user1 = user_info.get(user_info.id == id)
 
     except DoesNotExist:
         return False
 
     else:
-        if user.firstname != '':
+        if user1.firstname and user1.lastname and user1.phone1 and user1.phone2 and user1.primary_email and user1.email and user1.address_line1 and user1.address_line2 and user1.pin and user1.country and user1.image == None:
             user1.firstname = user.firstname
-        else:
-            return 'firstname cannot be null'
-
-        if user.lastname != '':
             user1.lastname = user.lastname
-        else:
-            return 'lastname cannot be null'
-
-        user1.phone1 = user.phone1
-        user1.phone2 = user.phone2
-
-        if user.primary_email != '':
+            user1.phone1 = user.phone1
+            user1.phone2 = user.phone2
             user1.primary_email = user.primary_email
-        else:
-            return 'Primary email cannot be null'
+            user1.email = user.email
+            user1.address_line1 = user.address_line1
+            user1.address_line2 = user.address_line2
+            user1.pin = user.pin
+            user1.country = user.country
+            user1.image = user.image
 
-        user1.email = user.email
-        user1.address_line1 = user.address_line1
-        user1.address_line2 = user.address_line2
-
-        if user.pin == None:
-            return 'Pin cannot be null'
         else:
-            if isinstance(user.pin, int):
-                s = str(user.pin)
-                l = len(s)
-                user.pin = int(s, 0)
-                if l <= 8:
-                    user1.pin = user.pin
-                else:
-                    return 'Pin is too long'
-            else:
-                return 'Pin must be in numbers'
-
-        if user.country == '':
-            return 'Country cannot be null'
-        else:
-            if len(user.country) <= 3:
+            if user.firstname != None and user.firstname != user1.firstname:
                 user1.firstname = user.firstname
-            else:
-                return 'Country code is too long'
 
-        user1.image = user.image
+            if user.lastname != None and user.lastname != user1.lastname:
+                user1.lastname = user.lastname
+
+            if user.phone1 != None and user.phone1 != user1.phone1:
+                user1.phone1 = user.phone1
+
+            if user.phone2 != None and user.phone2 != user1.phone2:
+                user1.phone2 = user.phone2
+
+            if user.primary_email != None and user.primary_email != user1.primary_email:
+                user1.primary_email = user.primary_email
+
+            if user.email != None and user.email != user1.email:
+                user1.email = user.email
+
+            if user.address_line1 != None and user.address_line1 != user1.address_line1:
+                user1.address_line1 = user.address_line1
+
+            if user.address_line2 != None and user.address_line2 != user1.address_line2:
+                user1.address_line2 = user.address_line2
+
+            if user.pin != None and user.pin != user1.pin:
+                user1.pin = user.pin
+
+            if user.country != None and user.country != user1.country:
+                user1.country = user.country
+
+            if user.image != None and user.image != user1.image:
+                user1.image = user.image
 
         user1.save()
         return True
@@ -246,20 +248,34 @@ def edit_user_info(id, user):
 
 def edit_user_pref(id, user):
     try:
-        user1 = UserPref.get(UserPref.id == id)
+        user1 = user_pref.get(user_pref.id == id)
 
     except DoesNotExist:
         return False
     else:
-        if user.color != '':
-            user1.color = user.color
-        else:
-            return 'Color cannot be null'
 
-        user1.decimal = user.decimal
-        user1.currency = user.currency
-        user1.time_format = user.time_format
-        user1.date_format = user.date_format
+        if user1.color and user1.decimal and user1.currency and user1.time_format and user1.date_format == None:
+            user1.color = user.color
+            user1.decimal = user.decimal
+            user1.currency = user.currency
+            user1.time_format = user.time_format
+            user1.date_format = user.date_format
+
+        else:
+            if user.color != None and user.color != user1.color:
+                user1.color = user.color
+
+            if user.decimal != None and user.decimal != user1.decimal:
+                user1.decimal = user.decimal
+
+            if user.currency != None and user.currency != user1.currency:
+                user1.currency = user.currency
+
+            if user.time_format != None and user.time_format != user1.time_format:
+                user1.time_format = user.time_format
+
+            if user.date_format != None and user.date_format != user1.date_format:
+                user1.date_format = user.date_format
 
         user1.save()
         return True
@@ -270,18 +286,18 @@ def edit_user_pref(id, user):
 
 def edit_user_role(id, role):
     try:
-        user1 = UserRole.get(UserRole.id == id)
+        user1 = user_role.get(user_role.id == id)
 
     except DoesNotExist:
         return False
     else:
-        if role != '':
-            if role == 'Admin' or role == 'User':
-                user1.role = role
-            else:
-                return 'There can be only two role: Admin and User '
+
+        if user1.role is None:
+            user1.role = role
         else:
-            return 'role cannot be null'
+            if user1.role != role and role != None:
+                user1.role = role
+
         user1.save()
         return True
 
@@ -290,7 +306,7 @@ def edit_user_role(id, role):
 
 def get_user(username, password):
     try:
-        user = UserCredential.get(UserCredential.username == username)
+        user = user_credential.get(user_credential.username == username)
 
         if user.password != password:
             return False
@@ -301,12 +317,12 @@ def get_user(username, password):
     else:
         return user
 
-#get_user_byusername function takes username and password as input and returns the object of UserCredential with same username and password
+#get_user_byusername function takes username and password as input and returns the object of user_credential with same username and password
 
 
 def get_user_by_username(username):
     try:
-        user = UserCredential.get(UserCredential.username == username)
+        user = user_credential.get(user_credential.username == username)
 
     except DoesNotExist:
         return False
@@ -320,7 +336,7 @@ def get_user_by_username(username):
 def list_all_users():
     user_list = []
     try:
-        for user in UserCredential.select():
+        for user in user_credential.select():
             user_list.append(user)
 
     except:
