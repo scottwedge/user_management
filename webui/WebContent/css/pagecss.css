@@ -76,8 +76,8 @@ fieldset {
 	background-color: white;
 	margin-left:auto;
 	margin-right:auto;
-	width:400px;
-	height: 200px;
+	width:500px;
+	text-align: left;
 }
 
 input[type='text'], input[type='password'], select{
@@ -85,7 +85,18 @@ input[type='text'], input[type='password'], select{
 	
 	width:175px;
 	
-	margin-bottom:10px;
+	
+}
+#searchdiv{
+	text-align: center;
+}
+.lab{
+	
+}
+
+#updateuserinfo{
+	margin-top: 20px;
+	height: 600px;
 }
 
 
@@ -102,7 +113,14 @@ legend {
 	text-transform:uppercase;
 	text-align: center;
 }
-
+label {
+	padding-top:5px;
+	display:block;
+	text-align:right;
+	float:left;
+	width:75px;
+	padding-right: 20px;
+}
 
 .buttonclass{
 	margin-top:10px;

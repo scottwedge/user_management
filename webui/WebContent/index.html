@@ -3,7 +3,7 @@
 <head>
 
 	<!-- Css-->
-	<link rel="stylesheet" type="text/css" href="css/headerstyle.css">
+	<link rel="stylesheet" type="text/css" href="css/pagecss.css">
 	<link rel="stylesheet" type="text/css" href="css/menustyle.css">
 	<link rel="stylesheet" type="text/css" href="css/tablestyle.css">
 	<!-- Backbone, Underscore , Jquery dependancies -->
@@ -67,7 +67,6 @@
 		
 		
 		Backbone.View.prototype.close = function(){
-			alert("calling backbones prototype");
 			this.undelegateEvents();
 	  		this.$el.removeData().unbind();
 	  		this.remove();
@@ -76,15 +75,29 @@
 		
 		var User = Backbone.Model.extend({
 			methodToURL: {
-			                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+				'read': 'http://10.10.10.55:5000/get_user',
+				'update':'http://10.10.10.55:5000/update_user',
+				'create':'http://10.10.10.55:5000/add_user',
+				'delete':'http://10.10.10.55:5000/delete_user'
 			  },
 
 			  sync: function(method, model, options) {
 			    options = options || {};
 			    options.url = model.methodToURL[method.toLowerCase()];
-				console.log(method.toLowerCase);
+				if(method.toLowerCase()=="read"){
+					options.url = options.url+'/'+this.get('username');
+				}
+				if(method.toLowerCase()=="delete"){
+					options.url = options.url+'/'+this.get('id');
+				}
+				
 			    return Backbone.sync.apply(this, arguments);
+			  },
+			  
+			  parse:function(response){
+				return response.user;
 			  }
+			  
 		});
 		
 		var UserCollection = Backbone.Collection.extend({
@@ -209,6 +222,10 @@
 			
 		});
 		
+		var BackboneModel = Backbone.Model.extend({
+			
+		});
+		
 		var AdminView = Backbone.View.extend({
 			
 			el:"#menu", 
@@ -220,7 +237,8 @@
 				'click #updateuser':'updateuser',
 				'click #updaterole':'updaterole',
 				'click #adduser':'adduser',
-				'click #logout':'logout'
+				'click #logout':'logout',
+				'click #deleteuser':'deleteuser'
 			},
 		
 			logout:function(){
@@ -257,19 +275,22 @@
 				var listuserview = new ListUserView({collection:coll});
 			},
 			
-			updateuser:function(){
-				
+			deleteuser:function(){
+				var user = new User();
+				var deleteuserview = new DeleteUserView({model:user});
 			},
 			
+			updateuser:function(){
+				var user = new User();
+				var updateuserview = new UpdateUserView({model:user});
+				
+			},
+			 
 			updaterole:function(){
 				var coll = new UserCollection();
 				var updateuserlistview = new UpdateUserListView({collection:coll});
 			},
-			
-			deleteuser:function(){
-				$("#content").html("hi u clicked delete user");
-			},
-			
+						
 			initialize:function(){
 				_.bindAll(this); 
 				
@@ -280,6 +301,185 @@
 				return this;
 			}
 			
+		});
+		
+		var DeleteUserView = Backbone.View.extend({
+			el :"#content",
+			
+			template:_.template($("#searchuserTemplate1").html()),
+			
+			template1:_.template($("#deleteuserTemplate").html()),
+			
+			events:{
+				'click #searchuser1':'searchuser',
+				'click #delete':'userdelete'
+			},
+			
+			initialize:function(){
+				this.render();	
+			},
+			
+			render:function(){
+				this.$el.html(this.template());
+			},
+			
+			searchuser:function(){
+				var username = $("#username").val();
+				var that = this;
+				this.model.set('username',username);
+				this.model.fetch({
+					success: function( model, response, options) {
+				       if(response.user!=null){
+				    	   that.deleteuser();
+				       }else{
+				    	   alert(response.status);
+				       }
+				    	   
+				    }				    
+				}); 
+			},
+			
+			deleteuser:function(){
+				this.$el.append(this.template1(this.model.toJSON()));
+			},
+					
+			userdelete:function(){
+				this.model.destroy({
+				      success: function(model, response){
+				    	  	if(response.status=="SUCCESS"){
+				    	  		var coll = new UserCollection();
+								var listuserview = new ListUserView({collection:coll});	
+				    	  	}else{
+				    			alert(response.status);	  		
+				    	  	}
+				    		
+				      },
+				      error: function(model, response){
+				        alert(response.status);
+				      }
+			});
+				    
+			}
+			
+		});
+		
+		
+		var UpdateUserView = Backbone.View.extend({
+			el :"#content",
+			
+			template:_.template($("#searchuserTemplate").html()),
+			template1:_.template($("#updateuserTemplate").html()),
+			
+			events:{
+				'click #searchuser':'searchuser',
+				'click #submit':'submit'
+			},
+						
+			initialize:function(){
+				this.render();	
+			},
+			
+			render:function(){
+				this.$el.html(this.template());
+			},
+					
+			searchuser:function(){
+				
+				var username = $("#username").val();
+				this.model.set('username',username);
+				var that = this;
+				this.model.fetch({
+					success: function( model, response, options) {
+				       if(response.user!=null){
+				    	   that.setfields();
+				       }else{
+				    	   alert(response.status);
+				       }
+				    	   
+				    }				    
+				}); 
+				//this.listenTo(this.model,'change', this.setfields);
+				
+			},
+			
+			setfields:function(){
+				console.log(this.model.get('currency'));
+				this.$el.append(this.template1);
+				$("#firstname").val(this.model.get('firstname'));
+				$("#lastname").val(this.model.get('lastname'));
+				$("#address_line1").val(this.model.get('address_line1'));
+				$("#address_line2").val(this.model.get('address_line2'));
+				$('[name=color]').val( this.model.get('color') );
+				$('[name=date_format]').val(this.model.get('date_format'));
+				$('[name=time_format]').val(this.model.get('time_format'));
+				$("#country").val(this.model.get('country'));
+				$('[name=currency]').val(this.model.get('currency'));
+				$("#pin").val(this.model.get('pin'));
+				$("#phone1").val(this.model.get('phone1'));
+				$("#phone2").val(this.model.get('phone2'));
+				$("#primary_email").val(this.model.get('primary_email'));
+				$("#decimal").val(this.model.get('decimal'));
+			},
+			
+			submit:function(){
+				this.setmodel();
+				console.log(this.model.toJSON());
+				this.model.save(null, {
+  					success: function (model, response) {
+  						if(response.status=="SUCCESS"){
+  							var coll = new UserCollection();
+  							var listuserview = new ListUserView({collection:coll});
+  						}else{
+  							alert(response.status);
+  						} 		     		  		 		
+     			  	},
+ 			   		error: function (model, response) {
+      					alert(response.status);
+    				}
+				});
+			},
+			
+			setmodel:function(){
+				//get user info from fields
+				var firstname= $("#firstname").val();
+				var lastname = $("#lastname").val();
+				var primary_email = $("#primary_email").val();
+				var phone1 = $("#phone1").val();
+				var phone2 = $("#phone2").val();
+				var address_line1 = $("#address_line1").val();
+				var address_line2 = $("#address_line2").val();
+				var country = $("#country").val();
+				var pin = $("#pin").val();
+				
+				//get user preferences from fields 
+				var color = $("#color option:selected").text();
+				var decimal = $("#decimal").val();
+				var currency=$("#currency option:selected").text();
+				var time_format=$("#time_format option:selected").text();
+				var date_format=$("#date_format option:selected").text();
+				
+				
+				//set user info to model
+				this.model.set('firstname',firstname);
+				this.model.set('lastname',lastname);
+				this.model.set('primary_email',primary_email);
+				this.model.set('email','');
+				this.model.set('phone1',phone1);
+				this.model.set('phone2',phone2);
+				this.model.set('address_line1',address_line1);
+				this.model.set('address_line2',address_line2);
+				this.model.set('country',country);
+				this.model.set('pin',parseInt(pin));
+				
+				//set user pref to model
+				this.model.set('color',color);
+				this.model.set('decimal',decimal);
+				this.model.set('time_format',time_format);
+				this.model.set('date_format',date_format);
+				this.model.set('currency',currency);
+			
+			 }
+								
 		});
 		
 		var AddUserCredentialView = Backbone.View.extend({
@@ -306,12 +506,19 @@
 				
 				this.model.save(null, {
   					success: function (model, response) {
-  							var	id = ""+response.user_id;
-  							rolemodel.set('id',id);
-  							console.log(rolemodel.toJSON());
-  							rolemodel.save();
-  							var userinfo = new UserInfo({'id':id});
-  	  						var adduserinfoview = new AddUserInfoView({model:userinfo});		
+  							if(response.status!=null){
+  								alert(response.status);
+  							}else{
+  								if(response.user_id!=null){
+  									var	id = ""+response.user_id;
+  		  							rolemodel.set('id',id);
+  		  							console.log(rolemodel.toJSON());
+  		  							rolemodel.save();
+  		  							var userinfo = new UserInfo({'id':id});
+  		  	  						var adduserinfoview = new AddUserInfoView({model:userinfo});		
+  								}
+  							}
+  									
   		     		  		 			   		
      			  	},
  			   		error: function (model, response) {
@@ -448,7 +655,7 @@
     	 	    		},
     	 	      	 success: function () {
     	 	      		console.log(that.collection);
-    	 	      		 alert(that.collection.toJSON());
+    	 	      		 
     	 	           		
     	 	    		}
     	 	    	}).complete(function () {
@@ -520,7 +727,7 @@
     	 	    		},
     	 	      	 success: function () {
     	 	      		console.log(that.collection);
-    	 	      		 alert(that.collection.toJSON());
+    	 	      		 
     	 	           		
     	 	    		}
     	 	    	}).complete(function () {
@@ -547,28 +754,6 @@
 			},
 						
 		});
-		
-		var UpdateUserView = Backbone.View.extend({
-			
-						
-			template: _.template( $('#updateuserTemplate').html() ),
-			
-			events:{
-				'click #update':'updateuser'
-			},
-			
-			updateuser:function(){
-				alert("you clicked update");
-			},
-					
-			render:function(){
-				this.$el.append(this.template(this.model.toJSON()));
-				return this;
-			}
-					
-			
-		});
-		
 				
 		var Router = Backbone.Router.extend({
 	    	
@@ -578,11 +763,9 @@
 	        },
 	      
 	    	index: function(){
-	    		alert("in index");
 	    		if(sessionmodel.get('username')==null)
 	    			alert("please login");
 	    		else{
-	    			alert("rendering view for "+sessionmodel.get('role'));
 	    			var indexview = new IndexView({model:sessionmodel});
 	    			$(document.body).append(indexview.render().el);
 		    		$("body").css("background-color",sessionmodel.get('color'));
@@ -666,11 +849,9 @@
 				</li>
 				<li id='adduser'><a><span>AddUser</span></a>
 				</li>
-				<li class='has-sub' id='updateuser'><a><span>Update User</span></a>
-					<ul><li class='last' ><a id='updaterole'><span>Update Role</span></a></li>
-						<li class='last'><a><span>Update UserName</span></a></li>
-					</ul>
+				<li id='updateuser'><a><span>Update User</span></a>
 				</li>
+				<li id='deleteuser'><a><span>Delete User</span></a>
 				<li class='last' id='logout'><a ><span>Logout</span></a></li></ul></div>
 	</script>
 	
@@ -701,11 +882,12 @@
     						<label for="password">Password:</label>
     						<input type="password" name="pass" id="password"  />
     						<br />
-							<label for="rolename">Role</label>
+							<label for="rolename">Role:</label>
     						<select id='role' name='role'>
   								<option value='admin'>Admin</option>
   								<option value='user'>User</option>
   							</select>
+							<br/>
     						<button type="submit" class="buttonclass" name="submit" id="submitButton" >Add Credentials</button>
   					</fieldset>
 				
@@ -790,15 +972,117 @@
     						<br/>
     						<button type="submit" class="buttonclass" name="submit" id="adduserinfobutton" >Add</button>
   					</fieldset>
+
+				
 				
 			</div>	
 	</script>
 	
-	<script type="text/template" id="">
+	
+	<script type="text/template" id="searchuserTemplate">
+			<div id='searchdiv'>
+				
+				Username :<input type='text' name='username' id='username' />
+				<button type="submit" class="buttonclass" name="submit" id="searchuser" >Search</button>
+			</div>
+	</script>
+	
+	<script type="text/template" id="searchuserTemplate1">
+			<div id='searchdiv'>
+				
+				Username :<input type='text' name='username' id='username' />
+				<button type="submit" class="buttonclass" name="submit" id="searchuser1" >Search</button>
+			</div>
+	</script>
+		
+	<script type="text/template" id="updateuserTemplate">
+			<div id='updateuserinfo'>
+				
+					<fieldset>
+  						<legend>Update User</legend>
+    						<label for="firstname">Firstname:</label>
+    							<input type="text" name="firstname" id="firstname" />
+    						<br/>
+							<label for="lastname">Lastname:</label>
+    							<input type="text" name="lastname" id="lastname" />
+    						<br />
+							<label for="primary_email">Email:</label>
+    							<input type="text" name="primary_email" id="primary_email" />
+    						<br/>
+							<label for="phone1">Phone1:</label>
+    							<input type="text" name="phone1" id="phone1" />
+    						<br />
+							<label for="phone2">Phone2:</label>
+    							<input type="text" name="phone2" id="phone2" />
+    						<br />
+												
+							<label for="address_line1">Address1:</label>
+    							<input type="text" name="address_line1" id="address_line1" />
+    						<br/>
+							<label for="address_line2">Address2:</label>
+    							<input type="text" name="address_line2" id="address_line2" />
+    						<br/>		
+							<label for="country">Country:</label>
+    							<input type="text" name="country" id="country" />
+    						<br/>    						
+							<label for="pin">Pin:</label>
+    							<input type="text" name="pin" id="pin" />
+    						<br/>
+												
+							<label for="color">Color</label>
+    						<select id='color' name='color'>
+  								<option value='Red'>Red</option>
+  								<option value='Green'>Green</option>
+  								<option value='Blue'>Blue</option>
+  							</select>
+    						<br />
+    						<label for="decimal">Decimal:</label>
+    						<input type='text' name='decimal' id='decimal'  />
+    						<br />
+							<label for="currency">Currency:</label>
+    						<select id='currency' name='currency'>
+  								<option value='in'>in</option>
+  								<option value='$'>$</option>
+  							</select>
+    						<br />
+							
+							<label for="time_format">Time_Format:</label>
+    						<select id='time_format' name='time_format'>
+  								<option value='HH:MM:SS'>HH:MM:SS</option>
+  								<option value='SS:MM:HH'>SS:MM:HH</option>
+  							</select>
+    						<br />
+							<label for='date_format'>Date_Format:</label>
+    						<select id='date_format' name="date_format">
+  								<option value='dd/mm/yy'>dd/mm/yy</option>
+  								
+  							</select>
+    						<br />
+    						<button type="submit" class="buttonclass" name="submit" id="submit" >Update</button>
+  						</fieldset>
+			</div>			
+
+	</script>
+	
+	<script type="text/template" id="updateuserTemplate">
 			<div id='adduserinfo'>
 				
 					<fieldset>
-  						<legend>Personal Info</legend>
+  						<legend>Add User</legend>
+
+							<label for="name">Username:</label>
+    						<input type="text" name="name" id="username" />
+    						<br />
+    						<label for="password">Password:</label>
+    						<input type="password" name="pass" id="password"  />
+    						<br />
+							<label for="rolename">Role:</label>
+    						<select id='role' name='role'>
+  								<option value='admin'>Admin</option>
+  								<option value='user'>User</option>
+  							</select>
+							<br/>
+							
     						<label for="firstname">Firstname:</label>
     							<input type="text" name="firstname" id="firstname" />
     						<br/>
@@ -827,19 +1111,59 @@
 							<label for="pin">Pin:</label>
     							<input type="text" name="pin" id="pin" />
     						<br/>
-    						<button type="submit" class="buttonclass" name="submit" id="adduserinfobutton" >Add</button>
-  					</fieldset>
-				
-			</div>	
+							  					
+						<label for="color">Color</label>
+    						<select id='color' name='color'>
+  								<option value='Red'>Red</option>
+  								<option value='Green'>Green</option>
+  								<option value='Blue'>Blue</option>
+  							</select>
+    						<br />
+    						<label for="decimal">Decimal:</label>
+    						<input type='text' name='decimal' id='decimal'  />
+    						<br />
+							<label for="currency">Currency:</label>
+    						<select id='currency' name='currency'>
+  								<option value='in'>in</option>
+  								<option value='$'>$</option>
+  							</select>
+    						<br />
+							
+							<label for="time_format">Time_Format:</label>
+    						<select id='time_format' name='time_format'>
+  								<option value='HH:MM:SS'>HH:MM:SS</option>
+  								<option value='SS:MM:HH'>SS:MM:HH</option>
+  							</select>
+    						<br />
+							<label for='date_format'>Date_Format:</label>
+    						<select id='date_format' name="date_format">
+  								<option value='dd/mm/yy'>dd/mm/yy</option>
+  								
+  							</select>
+    						<br />
+    						<button type="submit" class="buttonclass" name="submit" id="submit" >Update</button>
+  						</fieldset>
+			</div>			
+
+	</script>
+	<script type="text/template" id="deleteuserTemplate">
+		<div id='deleteuser'>
+			<table class="bordered">
+			<tr>
+				<th>ID</th><th>Firstname</th><th>Lastname</th><th>Action</th>
+			</tr>
+			<tr>
+					<td><%=this.model.get('id')%></td>
+					<td><%=this.model.get('firstname')%></td>
+					<td><%=this.model.get('lastname')%></td>
+					<td><button type="submit" class="buttonclass" name="Delete" id="delete" >Delete</button></li></td>
+			<tr>
+		</div>
+			
 	</script>
 	
-	<script type="text/template" id="updateuserTemplate">
-				<td><%=this.model.get('id')%></td>
-				<td><%=this.model.get('firstname')%></td>
-				<td><%=this.model.get('lastname')%></td>
-				<td><%=this.model.get('role')%></td>
-				<td><button class='buttonclass' name='Update' id='update'>Update</td>
-	</script>
+	
+	
 	
 	
 	</body>
