@@ -74,7 +74,7 @@ def get_users():
     user_creds_list = list_all_users()
 
     if len(user_creds_list) == 0:
-        return "There are no users", 406
+        return jsonify({'status': 'NO USERS AVAILABLE'})
 
     all_users_list = []
 
@@ -103,23 +103,20 @@ def delet_user(user_id):
     status = delete_user(user_id)
 
     if status == True:
-        return "user deleted"
-    return "INVALID ID", 406
+        return jsonify({'status': 'SUCCESS'})
+    return jsonify({'status': 'INVALID USER ID'})
 
 
-@app.route('/get_user/<username>/<current_user_id>', methods=['GET'])
+@app.route('/get_user/<username>', methods=['GET'])
 @login_required
-def get_user_api(username, current_user_id):
+def get_user_api(username):
     """Method for getting full information of User
-    by using its username which is unique
+    by using its username which is unique.
     Responses:
     INVALID USERNAME - your given username is not present
     USER INFO NOT PRESENT - user_info is not available
                             for required username
     USER PREF NOT PRESENT - user_pref is not available
-                            for required username
-    INVALID USER ID - entered current_user_id is wrong
-    USER ROLE NOT PRESENT - user_role is not available
                             for required username"""
 
     #temporary directory we will send as response
@@ -128,7 +125,7 @@ def get_user_api(username, current_user_id):
     user_cred = get_user_by_username(username)
 
     if user_cred == False:
-        return jsonify({'status': 'INVALID USERNAME'}), 406
+        return jsonify({'status': 'INVALID USERNAME'})
     else:
         temp_dict['id'] = user_cred.id
 
@@ -136,7 +133,7 @@ def get_user_api(username, current_user_id):
         user_info = get_user_info(user_cred.id)
 
         if user_info == False:
-            return jsonify({'status': 'USER INFO NOT PRESENT'}), 406
+            return jsonify({'status': 'USER INFO NOT PRESENT'})
         else:
             temp_dict['firstname'] = user_info.firstname
             temp_dict['lastname'] = user_info.lastname
@@ -153,7 +150,7 @@ def get_user_api(username, current_user_id):
         user_pref = get_user_pref(user_cred.id)
 
         if user_pref == False:
-            return jsonify({'status': 'USER PREF NOT PRESENT'}), 406
+            return jsonify({'status': 'USER PREF NOT PRESENT'})
         else:
             temp_dict['color'] = user_pref.color
             temp_dict['decimal'] = user_pref.decimal
@@ -162,7 +159,7 @@ def get_user_api(username, current_user_id):
             temp_dict['date_format'] = user_pref.date_format
 
         #if 'admin' is logged in then only he will see the role field
-
+        '''
         logged_in_user_role = get_user_role(current_user_id)
 
         if logged_in_user_role == False:
@@ -174,9 +171,71 @@ def get_user_api(username, current_user_id):
             if user_role == False:
                 return jsonify({'status': 'USER ROLE NOT PRESENT'}), 406
             elif user_role.role != 'Admin':
-                temp_dict['role'] = user_role.role
+                temp_dict['role'] = user_role.role'''
 
     return jsonify({'user': temp_dict})
+
+
+@app.route('/add_user', methods=['POST'])
+@login_required
+def add_user_api():
+    """Add objects for user_pref, user_info and user_role"""
+    if not request.json:
+        abort(400)
+
+    temp_user_id = request.json['id']
+    temp_user_role = request.json['role']
+
+    status = edit_user_role(temp_user_id, temp_user_role)
+
+    if status == False:
+        return jsonify({'status': 'INVALID USER ID'})
+    elif status == True:
+        return update_user_api()
+    else:
+        return jsonify({'status': status})
+
+
+@app.route('/update_user', methods=['PUT'])
+@login_required
+def update_user_api():
+    """Method for updating full information of User
+    Responses:"""
+
+    status = edit_user_pref_method()
+
+    if status == False:
+        return jsonify({'status': 'INVALID USER ID'})
+    elif status == True:
+
+        """We will do further operations if status == True
+        i.e. user_pref object is updated in DB"""
+        status = edit_user_info_method()
+
+        if status == False:
+            return jsonify({'status': 'INVALID USER ID'})
+        elif status == True:
+            return jsonify({'status': 'SUCCESS'})
+        else:
+            return jsonify({'status': status})
+    else:
+        return jsonify({'status': status})
+
+    '''
+    logged_in_user_role = get_user_role(current_user_id)
+
+    if logged_in_user_role == False:
+        return jsonify({'status': 'INVALID USER ID'}), 406
+    elif logged_in_user_role.role == 'Admin':
+        temp_user_role = UserRole()
+        temp_user_role.id = request.json['id']
+        temp_user_role.role = request.json['role']
+
+        edit_user_role(temp_user_role.id, temp_user_role)
+    '''
+    return jsonify({'status': 'SUCCESS'})
+
+
 
 
 @app.route('/get_user_info/<user_id>', methods=['GET'])
@@ -266,12 +325,12 @@ def add_user_creds_api():
     username = request.json['username']
     password = request.json['password']
 
-    created_user = add_user(username, password)
+    created_user_id = add_user(username, password)
 
-    if created_user == False:
-        return "user not created", 406
+    if isinstance(created_user_id, basestring):
+        return jsonify({'status': created_user_id})
     else:
-        return jsonify({'user_id': created_user.id})
+        return jsonify({'user_id': created_user_id})
 
 
 @app.route('/add_user_pref', methods=['PUT'])
@@ -319,8 +378,10 @@ def add_user_role_api():
 
     if status == True:
         return jsonify({"status": "SUCCESS"})
+    elif status == False:
+        return jsonify({"status": "INVALID USER ID"})
     else:
-        return "", 406
+        return jsonify({"status": status})
 
 
 @app.route('/logout', methods=['POST'])
@@ -345,14 +406,14 @@ def change_password():
     user_cred = get_user_credential(user_id)
 
     if user_cred == False:
-        return "INVALID USER"
+        return jsonify({"status": "INVALID USER ID"})
     else:
         if user_cred.password != old_password:
-            return "INCORRECT PASSWORD"
+            return jsonify({"status": "INCORRECT OLD PASSWORD"})
         else:
             new_password = request.json['new_password']
 
-            temp_user_cred = user_credential()
+            temp_user_cred = UserCredential()
             temp_user_cred.id = user_id
             temp_user_cred.username = user_cred.username
             temp_user_cred.password = new_password
@@ -360,9 +421,11 @@ def change_password():
             status = edit_user_credential(temp_user_cred.id, temp_user_cred)
 
             if status == True:
-                return "changed"
+                return jsonify({"status": "SUCCESS"})
+            elif status == False:
+                return jsonify({"status": "INVALID USER ID"})
             else:
-                return "ERROR", 406
+                return jsonify({"status": "PASSWORD CANNOT BE NULL"})
 
 
 """General methods"""
@@ -371,7 +434,7 @@ def change_password():
 def edit_user_pref_method():
     """This is generalized method for editing user_pref
     Made it generalized beacuse it is being called from multiple places"""
-    temp_user_pref = user_pref()
+    temp_user_pref = UserPref()
 
     temp_user_pref.id = request.json['id']
     temp_user_pref.color = request.json['color']
@@ -389,7 +452,7 @@ def edit_user_info_method():
     """This is generalized method for editing user_info
     Made it generalized beacuse it is being called from multiple places"""
 
-    temp_user_info = user_info()
+    temp_user_info = UserInfo()
 
     temp_user_info.id = request.json['id']
     temp_user_info.firstname = request.json['firstname']
