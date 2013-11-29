@@ -11,13 +11,21 @@
 	<script>
 
 $(function(){
-		$('#submitButton').click( function(e) {
-			
-			e.preventDefault();
+		
+		$('#loginform').validate({ // initialize the plugin
+        	rules: {
+            	username: {
+                	required: true,
+                },
+            	password: {
+                	required: true,
+                }
+        	},
+        	submitHandler: function (form) {
 						
 			var username= $("#username").val();
 			var password=$("#password").val();
-			
+					
 			var Credentials = new Object();
 			Credentials.username=username;
 			Credentials.password=password;
@@ -50,6 +58,8 @@ $(function(){
 					alert("internal server error");
 			    }
 			 });
+        	
+        	}
 			 
 		});
 			
@@ -69,14 +79,11 @@ $(function(){
 				<form id ="loginform" >
 					<fieldset>
   						<legend>Please Login</legend>
-    						<label for="name">Username:</label>
-    						<input type="text" name="name" id="username" required />
-    						<label for="username" class="error" generated="true"></label>
+    						<input type="text" name="name" id="username" placeholder="Username" required />
     						<br />
-    						<label for="password">Password:</label>
-    						<input type="password" name="pass" id="password" required />
+    						<input type="password" name="pass" id="password" placeholder="Password" required />
     						<br />
-    						<button type="submit" class="buttonclass" name="submit" id="submitButton" >Login</button>
+    						<input type="submit" class="buttonClass"/>
   					</fieldset>
 				</form>
 	</div>
