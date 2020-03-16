@@ -67,7 +67,7 @@ class Test_user_management(unittest.TestCase):
         color = input('enter the color')
         user.color = color
         x = edit_user_pref(id, user)
-        self.asertEqual(x, True, 'user edited')
+        self.assertEqual(x, True, 'user edited')
 
     def test_edit_user_role(self):
         user = user_role()
@@ -75,7 +75,7 @@ class Test_user_management(unittest.TestCase):
         role = input('enter the role')
         user.role = role
         x = edit_user_pref(id, user)
-        self.asertEqual(x, True, 'user edited')
+        self.assertEqual(x, True, 'user edited')
 
     def test_get_user_byusername(self):
         username = input('enter the username')
